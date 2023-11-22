@@ -25,7 +25,7 @@ class Accelerator extends Module {
   io.address := 0.U(32.W)
   io.dataWrite := 0.U(32.W)
   io.done := 0.U(32.W)
-  
+
   //FSMD switch
   switch(stateReg) {
     is(idle) {
@@ -49,23 +49,27 @@ class Accelerator extends Module {
         x := x + 1.U(16.W)
         stateReg := x_loop
       } .otherwise {
-        stateReg := border_check
-      }
-    }
-
-    is(border_check) {
-      when(x === 0.U(16.W) || x === 19.U(16.W) || y === 0.U(16.W) || y === 19.U(16.W)) {
-        stateReg := write_black
+        when(x === 0.U(16.W) || x === 19.U(16.W) || y === 0.U(16.W) || y === 19.U(16.W)) {
+        io.address := y*20.U(16.W)+x+400.U(16.W)
+        io.writeEnable := true.B
+        io.dataWrite := 0.U(32.W)
+        y := y + 1.U(16.W)
+        stateReg := y_loop
       } .otherwise {
         io.address := y*20.U(16.W) + x
         dataReg := io.dataRead
         stateReg := black_check
       }
+      }
     }
 
     is(black_check) {
       when(dataReg === 0.U(32.W)) {
-        stateReg := write_black
+        io.address := y*20.U(16.W)+x+400.U(16.W)
+        io.writeEnable := true.B
+        io.dataWrite := 0.U(32.W)
+        y := y + 1.U(16.W)
+        stateReg := y_loop
       } .otherwise {
         io.address := y*20.U(16.W)+x-1.U(16.W)
         dataReg := io.dataRead
@@ -75,7 +79,11 @@ class Accelerator extends Module {
 
     is(check_left) {
       when(dataReg === 0.U(32.W)) {
-        stateReg := write_black
+        io.address := y*20.U(16.W)+x+400.U(16.W)
+        io.writeEnable := true.B
+        io.dataWrite := 0.U(32.W)
+        y := y + 1.U(16.W)
+        stateReg := y_loop
       } .otherwise {
         io.address := y*20.U(16.W)+x+1.U(16.W)
         dataReg := io.dataRead
@@ -85,7 +93,11 @@ class Accelerator extends Module {
 
     is(check_right) {
       when(dataReg === 0.U(32.W)) {
-        stateReg := write_black
+        io.address := y*20.U(16.W)+x+400.U(16.W)
+        io.writeEnable := true.B
+        io.dataWrite := 0.U(32.W)
+        y := y + 1.U(16.W)
+        stateReg := y_loop
       } .otherwise {
         io.address := (y+1.U(16.W))*20.U(16.W)+x
         dataReg := io.dataRead
@@ -95,7 +107,11 @@ class Accelerator extends Module {
 
     is(check_down) {
       when(dataReg === 0.U(32.W)) {
-        stateReg := write_black
+        io.address := y*20.U(16.W)+x+400.U(16.W)
+        io.writeEnable := true.B
+        io.dataWrite := 0.U(32.W)
+        y := y + 1.U(16.W)
+        stateReg := y_loop
       } .otherwise {
         io.address := (y-1.U(16.W))*20.U(16.W)+x
         dataReg := io.dataRead
@@ -104,26 +120,16 @@ class Accelerator extends Module {
     }
 
     is(check_up) {
-      when(dataReg === 0.U(32.W)) {
-        stateReg := write_black
-      } .otherwise {
         io.address := y*20.U(16.W)+x+400.U(16.W)
         io.writeEnable := true.B
-        io.dataWrite := 255.U(32.W)
-        stateReg := inc_y
-      }
-    }
-
-    is(write_black) {
-        io.address := y*20.U(16.W)+x+400.U(16.W)
-        io.writeEnable := true.B
-        io.dataWrite := 0.U(32.W)
-        stateReg := inc_y
-    }
-
-    is(inc_y) {
-      y := y + 1.U(16.W)
-      stateReg := y_loop
+        y := y + 1.U(16.W)
+        stateReg := y_loop
+      
+        when(dataReg === 0.U(32.W)) {
+          io.dataWrite := 0.U(32.W)
+        } .otherwise {   
+          io.dataWrite := 255.U(32.W)
+        }
     }
 
     is(done) {
