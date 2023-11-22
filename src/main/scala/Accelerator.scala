@@ -30,14 +30,16 @@ class Accelerator extends Module {
   switch(stateReg) {
     is(idle) {
       when(io.start) {
-        stateReg := x_loop
+        io.done := false.B
         x := 0.U(16.W)
+        stateReg := x_loop
       }
     }
 
     is(x_loop) {
       when(x > 19.U(16.W)) {
-        stateReg := done
+        io.done := true.B
+        stateReg := idle
       } .otherwise {
         y := 0.U(16.W)
         stateReg := y_loop
@@ -48,6 +50,7 @@ class Accelerator extends Module {
       when(y > 19.U(16.W)) {
         x := x + 1.U(16.W)
         stateReg := x_loop
+
       } .otherwise {
         when(x === 0.U(16.W) || x === 19.U(16.W) || y === 0.U(16.W) || y === 19.U(16.W)) {
         io.address := y*20.U(16.W)+x+400.U(16.W)
@@ -55,6 +58,7 @@ class Accelerator extends Module {
         io.dataWrite := 0.U(32.W)
         y := y + 1.U(16.W)
         stateReg := y_loop
+
       } .otherwise {
         io.address := y*20.U(16.W) + x
         dataReg := io.dataRead
@@ -70,6 +74,7 @@ class Accelerator extends Module {
         io.dataWrite := 0.U(32.W)
         y := y + 1.U(16.W)
         stateReg := y_loop
+
       } .otherwise {
         io.address := y*20.U(16.W)+x-1.U(16.W)
         dataReg := io.dataRead
@@ -84,6 +89,7 @@ class Accelerator extends Module {
         io.dataWrite := 0.U(32.W)
         y := y + 1.U(16.W)
         stateReg := y_loop
+
       } .otherwise {
         io.address := y*20.U(16.W)+x+1.U(16.W)
         dataReg := io.dataRead
@@ -98,6 +104,7 @@ class Accelerator extends Module {
         io.dataWrite := 0.U(32.W)
         y := y + 1.U(16.W)
         stateReg := y_loop
+
       } .otherwise {
         io.address := (y+1.U(16.W))*20.U(16.W)+x
         dataReg := io.dataRead
@@ -112,6 +119,7 @@ class Accelerator extends Module {
         io.dataWrite := 0.U(32.W)
         y := y + 1.U(16.W)
         stateReg := y_loop
+
       } .otherwise {
         io.address := (y-1.U(16.W))*20.U(16.W)+x
         dataReg := io.dataRead
@@ -132,9 +140,9 @@ class Accelerator extends Module {
         }
     }
 
-    is(done) {
-      io.done := true.B
-      stateReg := done
-    }
+//    is(done) {
+//      io.done := true.B
+//      stateReg := done
+//    }
   }
 }
