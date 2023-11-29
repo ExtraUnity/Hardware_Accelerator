@@ -14,7 +14,7 @@ class Accelerator extends Module {
   })
 
   //State enum and register
-  val idle :: x_loop :: y_loop :: border_check :: black_check :: check_left :: check_right :: check_down :: check_up :: Nil = Enum (9)
+  val idle :: x_loop :: y_loop :: black_check :: check_left :: check_right :: check_down :: check_up :: Nil = Enum (8)
   val stateReg = RegInit(idle)
   val x = RegInit(0.U(16.W))
   val y = RegInit(0.U(16.W))
