@@ -14,7 +14,7 @@ class Accelerator extends Module {
   })
 
   //State enum and register
-  val idle :: x_loop :: y_loop :: border_check :: black_check :: check_left :: check_right :: check_down :: check_up :: write_black :: inc_y :: done :: Nil = Enum (12)
+  val idle :: x_loop :: y_loop :: border_check :: black_check :: check_left :: check_right :: check_down :: check_up :: Nil = Enum (9)
   val stateReg = RegInit(idle)
   val x = RegInit(0.U(16.W))
   val y = RegInit(0.U(16.W))
@@ -59,11 +59,11 @@ class Accelerator extends Module {
         y := y + 1.U(16.W)
         stateReg := y_loop
 
-      } .otherwise {
-        io.address := y*20.U(16.W) + x
-        dataReg := io.dataRead
-        stateReg := black_check
-      }
+        } .otherwise {
+          io.address := y*20.U(16.W) + x
+          dataReg := io.dataRead
+          stateReg := black_check
+        }
       }
     }
 
@@ -140,9 +140,6 @@ class Accelerator extends Module {
         }
     }
 
-//    is(done) {
-//      io.done := true.B
-//      stateReg := done
-//    }
+
   }
 }
